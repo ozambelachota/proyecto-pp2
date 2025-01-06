@@ -8,7 +8,7 @@ const formSchemaEquipo = z.object({
     .string()
     .min(2, "El numero de serie debe tener al menos 2 caracteres"),
   disponible: z.boolean().default(true),
-  tipo_equipo_id: z.number().min(1, "Por favor seleccione un tipo de equipo"),
+  tipo_equipo_id: z.string().min(1, "Por favor seleccione un tipo de equipo"),
 });
 
 

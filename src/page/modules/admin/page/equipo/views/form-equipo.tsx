@@ -19,7 +19,7 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { Toaster } from "sonner";
+import { toast, Toaster } from "sonner";
 import { z } from "zod";
 import { equipoService } from "../../services/equipo-service";
 import { tipoEquipoService } from "../../services/tipo-equipo-service";
@@ -29,11 +29,26 @@ import { ITipoEquipo } from "../types/tipo-equipo";
 export default function FormEquipo() {
   const formEquipo = useForm<z.infer<typeof formSchemaEquipo>>({
     resolver: zodResolver(formSchemaEquipo),
+    defaultValues: {
+      nombre: "",
+      disponible: true,
+      marca: "",
+      modelo: "",
+      numero_serie: "",
+      tipo_equipo_id: "",
+    }
   });
   const mutate = useMutation({
     mutationKey: ["equipo", formEquipo.getValues()],
     mutationFn: async (data: z.infer<typeof formSchemaEquipo>) => {
-      return await equipoService.insertEquipo(data);
+      return await equipoService.insertEquipo({
+        ...data,  
+        tipo_equipo_id: Number(data.tipo_equipo_id),
+      });
+    },
+    onSuccess: () => {
+      toast.success("Equipo creado correctamente");
+      formEquipo.reset();
     },
   });
   const tipoQuery = useQuery({
@@ -46,13 +61,14 @@ export default function FormEquipo() {
     data: z.infer<typeof formSchemaEquipo>
   ) => {
     console.log("onSaveEquipo", data);
+    mutate.mutate(data);
   };
   return (
     <>
       <div>
         <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-md">
           <h2 className="text-2xl font-bold mb-6 text-center">
-            Datos Personales
+            Datos del Equipo Medico
           </h2>
           <Form {...formEquipo}>
             <form
@@ -127,7 +143,7 @@ export default function FormEquipo() {
                     <Select onValueChange={field.onChange}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select a verified email to display" />
+                          <SelectValue placeholder="Seleccionar tipo" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
