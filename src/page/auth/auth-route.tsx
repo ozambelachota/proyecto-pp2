@@ -1,4 +1,4 @@
-import { Route } from "react-router-dom";
+import { Route } from "react-router";
 import LoginPage from "./login";
 import RegisterPage from "./registro";
 
