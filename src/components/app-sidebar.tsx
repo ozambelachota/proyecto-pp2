@@ -66,13 +66,13 @@ const data = {
       ],
     },
     {
-      title: "Models",
-      url: "#",
+      title: "EQUIPOOS MEDICOS",
+      url: "/admin/equipo/",
       icon: Bot,
       items: [
         {
-          title: "Genesis",
-          url: "#",
+          title: "Agregar equipo",
+          url: "/admin/equipo/crear-equipo",
         },
         {
           title: "Explorer",

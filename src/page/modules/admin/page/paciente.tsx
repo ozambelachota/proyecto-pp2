@@ -33,24 +33,28 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { cn } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AccordionTrigger } from "@radix-ui/react-accordion";
 import { useQuery } from "@tanstack/react-query";
 import { formatDate } from "date-fns";
 import { CalendarIcon } from "lucide-react";
+import { useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { z } from "zod";
 import { pacienteService } from "./services/paciente-service.";
-import { cn } from "@/lib/utils";
+import { usePacienteStore } from "./store/use-paciente-store";
+import { IPaciente } from "./types/paciente.interface";
+import { EditarModal } from "./views/edit-paciente";
 
 const formSchema = z.object({
   dni: z.string().optional(),
   nombre: z.string().optional(),
   apellido: z.string().optional(),
-  sexo: z.enum(["todos", "masculino", "femenino"]).optional(),
+  sexo: z.enum(["Masculino", "Femenino"]).optional(),
   fechaNacimiento: z.date().optional(),
 });
-
+type Paciente = z.infer<typeof formSchema>;
 type FormData = z.infer<typeof formSchema>;
 function Paciente() {
   const form = useForm<FormData>({
@@ -59,19 +63,31 @@ function Paciente() {
       dni: "",
       nombre: "",
       apellido: "",
-      sexo: "todos",
       fechaNacimiento: undefined,
     },
   });
+  const { setEditForm } = usePacienteStore();
   const pacienteQuery = useQuery({
     queryKey: ["pacientes"],
     queryFn: async () => {
-      const pacientes = await pacienteService.getPacientes();
+      const pacientes = await pacienteService.getPacientes({
+        dni: form.watch("dni"),
+        nombre: form.watch("nombre"),
+        apellido: form.watch("apellido"),
+        fecha_nacimiento: form.watch("fechaNacimiento"),
+        genero: form.watch("sexo"),
+      });
       return pacientes;
     },
   });
-  const onFilter: SubmitHandler<FormData> = (data: FormData) => {
+  const [open, setOpen] = useState(false);
+  const handleEdit = (data: IPaciente) => {
     console.log(data);
+    setEditForm(data);
+    setOpen(true);
+  };
+  const onFilter: SubmitHandler<FormData> = () => {
+    pacienteQuery.refetch();
   };
   if (pacienteQuery.isLoading) {
     return <div>Loading...</div>;
@@ -86,7 +102,7 @@ function Paciente() {
         type="single"
         collapsible
         defaultValue="filtrado"
-        className="mb-6"
+        className="mb-6 w-full"
       >
         <AccordionItem value="filtrado">
           <AccordionTrigger>Filtros de Búsqueda</AccordionTrigger>
@@ -149,9 +165,8 @@ function Paciente() {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="todos">Todos</SelectItem>
-                            <SelectItem value="masculino">Masculino</SelectItem>
-                            <SelectItem value="femenino">Femenino</SelectItem>
+                            <SelectItem value="Masculino">Masculino</SelectItem>
+                            <SelectItem value="Femenino">Femenino</SelectItem>
                           </SelectContent>
                         </Select>
                       </FormItem>
@@ -202,6 +217,17 @@ function Paciente() {
                     <Button type="submit" className="w-full">
                       Buscar
                     </Button>
+                    <Button
+                      type="reset"
+                      variant={"secondary"}
+                      className="w-full"
+                      onClick={() => {
+                        form.reset();
+                        pacienteQuery.refetch();
+                      }}
+                    >
+                      Limpiar
+                    </Button>
                   </div>
                 </div>
               </form>
@@ -214,7 +240,7 @@ function Paciente() {
         type="single"
         collapsible
         defaultValue="resultados"
-        className="mb-6"
+        className="mb-6 w-full"
       >
         <AccordionItem value="resultados">
           <AccordionTrigger>Resultados de la Búsqueda</AccordionTrigger>
@@ -227,6 +253,7 @@ function Paciente() {
                   <TableHead>Apellido</TableHead>
                   <TableHead>Sexo</TableHead>
                   <TableHead>Fecha de Nacimiento</TableHead>
+                  <TableHead>Acciones</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -240,6 +267,9 @@ function Paciente() {
                       <TableCell>
                         {formatDate(item.fecha_nacimiento, "dd/MM/yyyy")}
                       </TableCell>
+                      <TableCell>
+                        <Button onClick={() => handleEdit(item)}>Editar</Button>
+                      </TableCell>
                     </TableRow>
                   ))}
               </TableBody>
@@ -247,6 +277,22 @@ function Paciente() {
           </AccordionContent>
         </AccordionItem>
       </Accordion>
+      <EditarModal
+        isOpen={open}
+        onClose={() => {
+          setEditForm({
+            id: 0,
+            dni: "",
+            nombre: "",
+            apellido: "",
+            genero: "Femenino",
+            fecha_nacimiento: new Date(),
+            telefono: "",
+            direccion: "",
+          });
+          setOpen(false);
+        }}
+      />
     </div>
   );
 }

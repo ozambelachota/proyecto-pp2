@@ -68,8 +68,8 @@ export default function FormCrearPaciente() {
     mutationFn: async (data: z.infer<typeof formSchema>) => {
       return await pacienteService.insertPaciente({
         dni: data.dni,
-        nombre: data.nombre,
-        apellido: data.apellido,
+        nombre: data.nombre.toUpperCase(),
+        apellido: data.apellido.toUpperCase(),
         genero: data.sexo,
         direccion: data.direccion,
         fecha_nacimiento: data.fechaNacimiento,
