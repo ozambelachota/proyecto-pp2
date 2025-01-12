@@ -1,3 +1,4 @@
+import supabase from "@/api/service-supabase";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -16,9 +17,13 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
+import { useNavigate } from "react-router";
 import { z } from "zod";
 import { LoginSchema } from "./domain/auth";
+import { useUserStore } from "./store/useUserStore";
+import { toast, Toaster } from "sonner";
 function LoginPage() {
   const form = useForm<z.infer<typeof LoginSchema>>({
     resolver: zodResolver(LoginSchema),
@@ -27,14 +32,52 @@ function LoginPage() {
       password: "",
     },
   });
-  const onLogin: SubmitHandler<z.infer<typeof LoginSchema>> = (
-    data: z.infer<typeof LoginSchema>
+  const navigate = useNavigate();
+  const onLogin: SubmitHandler<z.infer<typeof LoginSchema>> = async (
+    login: z.infer<typeof LoginSchema>
   ) => {
-    console.log("onLogin", data);
+    const {  error } = await supabase.auth.signInWithPassword({
+      email: login.username,
+      password: login.password,
+    });
+    if (error) {
+      toast.error(error.message);
+    }
+    navigate("/admin/");
   };
+  const { setUser } = useUserStore();
+  useEffect(() => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_IN") {
+        if (session) {
+          setUser({
+            email: session.user?.email as string,
+            username: session.user?.user_metadata.username,
+          });
+          navigate("/admin/");
+        }
+      } else if (event === "SIGNED_OUT") {
+        navigate("/login");
+      } else if (event === "INITIAL_SESSION") {
+        if (session) {
+          setUser({
+            email: session.user?.email as string,
+            username: session.user?.user_metadata.username,
+          });
+          navigate("/admin/");
+        }
+      }
+    });
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
   return (
     <div className="flex h-screen">
       {/* Columna del formulario */}
+      <Toaster position="top-right" />
       <div className="w-1/2 h-screen bg-blue-100 flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-4xl font-bold text-blue-800 mb-4">

@@ -51,17 +51,17 @@ const data = {
   navMain: [
     {
       title: "Pacientes",
-      url: "/admin/paciente",
+      url: "/admin/paciente/",
       icon: SquareTerminal,
       isActive: true,
       items: [
         {
           title: "Crear",
-          url: "/admin/crear-paciente",
+          url: "/admin/paciente/crear-paciente",
         },
         {
           title: "Asignar equipo",
-          url: "#",
+          url: "/admin/paciente/asignacion",
         },
       ],
     },

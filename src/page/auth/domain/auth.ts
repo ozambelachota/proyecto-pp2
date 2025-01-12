@@ -15,3 +15,12 @@ export const LoginSchema = z.object({
       message: "Password must be at least 2 characters.",
     }),
 });
+
+export interface ILogin {
+  username: string;
+  password: string;
+}
+export interface IAuth {
+  username: string;
+  email: string;
+}

@@ -10,7 +10,14 @@ const formSchemaEquipo = z.object({
   disponible: z.boolean().default(true),
   tipo_equipo_id: z.string().min(1, "Por favor seleccione un tipo de equipo"),
 });
-
+export interface IEquipoFilter{
+  nombre?: string;
+  marca?: string;
+  modelo?: string;
+  numero_serie?: string;
+  disponible?: string;
+  tipo_equipo_id?: string;
+}
 
 export { formSchemaEquipo };
 
@@ -21,4 +28,18 @@ export interface IFormEquipo {
   numero_serie: string;
   disponible: boolean;
   tipo_equipo_id: number;
+}
+
+export interface IEquipo {
+  id: number;
+  nombre: string;
+  marca: string;
+  modelo: string;
+  numero_serie: string;
+  disponible: boolean;
+  tipo_equipo_id: number;
+  tipo_equipo: {
+    id: number;
+    nombre: string;
+  };
 }
