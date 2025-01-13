@@ -17,6 +17,7 @@ export const pacienteService = {
       query = query.eq("fecha_nacimiento", _filter.fecha_nacimiento);
 
     const response = await query;
+    console.log(response)
     if (response.error) throw new Error(response.error.message);
     return response.data as IPaciente[];
   },

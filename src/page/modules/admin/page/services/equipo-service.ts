@@ -1,6 +1,14 @@
 import supabase from "@/api/service-supabase";
 import { IEquipo, IEquipoFilter, IFormEquipo } from "../equipo/types/equipo";
-
+interface IEquipoEdit {
+  id: number;
+  nombre: string;
+  marca: string;
+  modelo: string;
+  numero_serie: string;
+  disponible: boolean;
+  tipo_equipo_id: number;
+}
 export const equipoService = {
   getEquiposFilter: async (_filter: IEquipoFilter): Promise<IEquipo[]> => {
     const query = supabase.from("equipos").select("*, tipo_equipo(*)");
@@ -20,6 +28,24 @@ export const equipoService = {
   },
   insertEquipo: async (equipo: IFormEquipo) => {
     const response = await supabase.from("equipos").insert(equipo);
+    if (response.error) throw new Error(response.error.message);
+
+    return response.data;
+  },
+  updateEquipo: async (equipo: IEquipoEdit) => {
+    const response = await supabase
+      .from("equipos")
+      .update({
+        disponible: equipo.disponible,
+        marca: equipo.marca,
+        modelo: equipo.modelo,
+        nombre: equipo.nombre,
+        numero_serie: equipo.numero_serie,
+        tipo_equipo_id: equipo.tipo_equipo_id,
+      })
+      .eq("id", equipo.id);
+
+    console.log(response);
     if (response.error) throw new Error(response.error.message);
 
     return response.data;

@@ -27,6 +27,10 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
+import { useUserStore } from "@/page/auth/store/useUserStore"
+import supabase from "@/api/service-supabase"
+import { toast } from "sonner"
+import { useNavigate } from "react-router"
 export function NavUser({
   user,
 }: {
@@ -36,7 +40,20 @@ export function NavUser({
     avatar: string
   }
 }) {
+  const navigate = useNavigate()
   const { isMobile } = useSidebar()
+  const setUser = useUserStore((state) => state.setUser)
+  const logout = async () => {
+     const { error } =    await supabase.auth.signOut()
+    if (error) {
+      toast.error(error.message);
+    }
+    setUser({
+      email: "",
+      username: "",
+    });
+    navigate("/");
+  }
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -98,7 +115,7 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={logout}>
               <LogOut />
               Log out
             </DropdownMenuItem>

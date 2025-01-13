@@ -20,17 +20,14 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { useUserStore } from "@/page/auth/store/useUserStore";
 import { Link } from "react-router";
 import { NavMain } from "./nav-main";
 import { NavUser } from "./nav-user";
+import { Toaster } from "sonner";
 
 // This is sample data.
 const data = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
   teams: [
     {
       name: "TELESALUD C.S NUEVO PARAISO",
@@ -74,18 +71,10 @@ const data = {
           title: "Agregar equipo",
           url: "/admin/equipo/crear-equipo",
         },
-        {
-          title: "Explorer",
-          url: "#",
-        },
-        {
-          title: "Quantum",
-          url: "#",
-        },
       ],
     },
     {
-      title: "Documentation",
+      title: "DIAGNOSTICOS",
       url: "#",
       icon: BookOpen,
       items: [
@@ -108,7 +97,7 @@ const data = {
       ],
     },
     {
-      title: "Settings",
+      title: "CONFIGURACION",
       url: "#",
       icon: Settings2,
       items: [
@@ -151,13 +140,15 @@ const data = {
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const user = useUserStore((state) => state.user);
   return (
-    <Sidebar variant="inset" {...props}>
+<>
+<Sidebar variant="inset" {...props}>
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <Link to="admin">
+              <Link to="/admin">
                 <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
                   <Command className="size-4" />
                 </div>
@@ -174,8 +165,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavMain items={data.navMain} />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser
+          user={{
+            name: "",
+            email: user.email,
+            avatar: "",
+          }}
+        />
       </SidebarFooter>
     </Sidebar>
+    <Toaster position="top-right" theme="dark" />
+</>
   );
 }

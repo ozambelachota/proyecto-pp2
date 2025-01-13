@@ -36,6 +36,9 @@ import { z } from "zod";
 import { equipoService } from "../services/equipo-service";
 import { tipoEquipoService } from "../services/tipo-equipo-service";
 import { formSchemaEquipo } from "./types/equipo";
+import { useEquipoStore } from "./store/useEquipoStore";
+import { useState } from "react";
+import FormEditEqiopo from "./views/edit-form-equipo";
 
 export default function EquipoHome() {
   const form = useForm<z.infer<typeof formSchemaEquipo>>({
@@ -51,7 +54,9 @@ export default function EquipoHome() {
   const equipoQuery = useQuery({
     queryKey: ["equipo"],
     queryFn: async () => {
+
       const reesponse = await equipoService.getEquiposFilter({
+        
         marca: form.watch("marca"),
         modelo: form.watch("modelo"),
         nombre: form.watch("nombre"),
@@ -61,6 +66,8 @@ export default function EquipoHome() {
       return reesponse;
     },
   });
+  const [open, setOpen] = useState(false);
+  const {setEquipo} = useEquipoStore();
   const tipoQuery = useQuery({
     queryKey: ["tipoEquipo"],
     queryFn: async () => {
@@ -82,7 +89,7 @@ export default function EquipoHome() {
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-6">Pacientes</h1>
+      <h1 className="text-2xl font-bold mb-6">Equipos Medicos</h1>
       <Accordion
         type="single"
         collapsible
@@ -229,7 +236,24 @@ export default function EquipoHome() {
                       <TableCell>{item.modelo}</TableCell>
                       <TableCell>{item.numero_serie}</TableCell>
                       <TableCell>{item.tipo_equipo?.nombre}</TableCell>
-
+                      <TableCell>
+                        <Button
+                          onClick={() => {
+                            setEquipo({
+                              id: item.id,
+                              nombre: item.nombre,
+                              marca: item.marca,
+                              modelo: item.modelo,
+                              numero_serie: item.numero_serie,
+                              disponible: item.disponible,
+                              tipo_equipo_id: item.tipo_equipo?.id,
+                            });
+                            setOpen(true);
+                          }}
+                        >
+                          Editar
+                        </Button>
+                      </TableCell>
                     </TableRow>
                   ))}
               </TableBody>
@@ -237,6 +261,9 @@ export default function EquipoHome() {
           </AccordionContent>
         </AccordionItem>
       </Accordion>
+      <FormEditEqiopo open={open} setOpen={() => {
+          
+        setOpen(false)}} />
     </div>
   );
 }

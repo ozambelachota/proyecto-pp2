@@ -14,7 +14,6 @@ export default function AdminRouter() {
         <Route index element={<Home />} />
         <Route path="paciente">
           <Route index element={<Paciente />} />
-          <Route path="inventario" element={<Home />} />
           <Route path="asignacion" element={<CalendarioEquipo />} />
           <Route path="crear-paciente" element={<FormCrearPaciente />} />
         </Route>

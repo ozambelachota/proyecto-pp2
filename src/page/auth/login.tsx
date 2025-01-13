@@ -74,6 +74,16 @@ function LoginPage() {
       subscription.unsubscribe();
     };
   }, []);
+  const loginWithGoogle =
+    async () => {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+      });
+      if (error) {
+        toast.error(error.message);
+      }
+      navigate("/admin/");
+    } 
   return (
     <div className="flex h-screen">
       {/* Columna del formulario */}
@@ -99,7 +109,9 @@ function LoginPage() {
           </CardHeader>
           <CardContent className="grid gap-4">
             <div className="grid grid-cols-2 gap-6">
-              <Button variant="outline">Google</Button>
+              <Button variant="outline" onClick={() => {
+                loginWithGoogle()
+              }}>Google</Button>
             </div>
             <div className="relative">
               <div className="absolute inset-0 flex items-center">

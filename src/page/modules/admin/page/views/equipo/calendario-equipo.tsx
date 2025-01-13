@@ -19,6 +19,7 @@ import dayGridPlugin from "@fullcalendar/daygrid";
 import FullCalendar from "@fullcalendar/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { isSameDay, parseISO } from "date-fns";
 import { useForm } from "react-hook-form";
 import { toast, Toaster } from "sonner";
 import { z } from "zod";
@@ -56,7 +57,11 @@ export default function CalendarioConFormulario() {
   });
 
   // Obtener datos de asignaciones para el calendario
-  const { data: asignaciones, isLoading: loadingAsignaciones } = useQuery({
+  const {
+    data: asignaciones,
+    isLoading: loadingAsignaciones,
+    refetch: refetchAsignaciones,
+  } = useQuery({
     queryKey: ["asignacionEquipo"],
     queryFn: async () => {
       console.log(asignacionEquipoService.getAsignacionEquipo());
@@ -78,6 +83,7 @@ export default function CalendarioConFormulario() {
     onSuccess: () => {
       toast.success("Asignación creada correctamente");
       formAsignacion.reset();
+      refetchAsignaciones();
     },
     onError: () => {
       toast.error("Error al crear la asignación");
@@ -85,6 +91,20 @@ export default function CalendarioConFormulario() {
   });
 
   const onSubmit = (data: z.infer<typeof formSchemaAsignacion>) => {
+    const asignacionExistente = asignaciones?.some(
+      (asignacion) =>
+        asignacion.equipo_id === Number(data.equipo_id) &&
+        isSameDay(
+          parseISO(new Date(data.fecha_asignacion).toISOString()),
+          asignacion.fecha_asignacion
+        )
+    );
+
+    if (asignacionExistente) {
+      toast.error("El equipo ya está asignado en esta fecha");
+      return;
+    }
+
     mutatation.mutate(data);
   };
 
@@ -119,7 +139,7 @@ export default function CalendarioConFormulario() {
                             key={paciente.id}
                             value={`${paciente.id}`}
                           >
-                            {paciente.nombre}
+                            {paciente.nombre + " " + paciente.apellido}
                           </SelectItem>
                         ))}
                       </SelectContent>

@@ -68,8 +68,6 @@ export function EditarModal({ isOpen, onClose }: EditarModalProps) {
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    console.log(pacienteStore.editForm);
-    console.log(form.getValues());
     form.reset(pacienteStore.editForm);
   }, [pacienteStore.editForm]);
   const updatePaciente = useMutation({
